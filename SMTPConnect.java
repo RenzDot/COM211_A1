@@ -25,6 +25,7 @@ import java.util.*;
 	private Socket connection;//Socket to server
 	
 	//Read & Write streams
+	private String response;
 	private BufferedReader fromServer;
 	private DataOutputStream toServer;
 	
@@ -50,15 +51,15 @@ import java.util.*;
 		//Allow toServer to write to socket
 		toServer = new DataOutputStream(	connection.getOutputStream() );
 		
-		//Check server's reply is 220
-		String reply = fromServer.readLine();
-		System.out.println("1)" + reply);
-		if (!reply.startsWith("220")) {
-			throw new IOException("220 reply not received from server.");
+		//Check server's response is 220
+		response = fromServer.readLine();
+		System.out.println("1)" + response);
+		if (!response.startsWith("220")) {
+			throw new IOException("220 response not received from server.");
 		}
 		
 		String localHost = InetAddress.getLocalHost().getHostName();
-		//sendCommand("DATA", );
+		sendCommand("DATA" + CRLF, 0);
 		
 		isConnected = true;
 	}
@@ -78,8 +79,13 @@ import java.util.*;
 	
 	
 	private void sendCommand(String command, int rc) throws IOException {
-	
-	
+		toServer.writeBytes("HELO alice" + CRLF);
+		response = fromServer.readLine();
+		System.out.println("2)" + response);
+		
+		
+		
+		
     }
 
 	

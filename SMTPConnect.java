@@ -10,38 +10,21 @@ import java.util.*;
 
 /**
  * Open SMTP connection to mailserver & send one mail.
- *
  */
 
- /*
- The first task is to program the SMTP interaction between the MUA and the local SMTP
- server. The client provides a graphical user interface containing fields for
- entering the sender and recipient addresses, the subject of the message and the
- message itself.
- */
- 
  public class SMTPConnect {
 	
 	private Socket connection;//Socket to server
+	private String response;
 	
 	//Read & Write streams
-	private String response;
 	private BufferedReader fromServer;
 	private DataOutputStream toServer;
 	
-	private boolean isConnected = false;// Used in close()
-	private static final String CRLF = "\r\n";
-	
+	private boolean isConnected = false;		//Checks connection, used in close()
+	private static final String CRLF = "\r\n";	//Used to separate commands
 	
 	public SMTPConnect(EmailMessage mailmessage) throws IOException {
-		
-		/*
-		Create SMTPConnect object ./
-		Create socket ./
-		Associate streams ./
-		Initialize SMTP connection ./
-		*/
-		
 		//Open TCP client socket
 		connection = new Socket(mailmessage.DestHost, mailmessage.DestHostPort);
 		
@@ -60,14 +43,18 @@ import java.util.*;
 			throw new IOException("220 response not received from server.");
 		}
 		
-		String localHost = InetAddress.getLocalHost().getHostName();//Name of client's computer
-		sendCommand("HELO " + localHost);
-		test(); // Remove before submitting project
-
+		//Name of client's computer
+		String localHost = InetAddress.getLocalHost().getHostName();
 		
+		//Send handshake
+		sendCommand("HELO " + localHost, 250);		
+		
+		//test(); // Debug only, remove before submitting project
+
 		isConnected = true;
 	}
 	
+	//Debug only, remove before submitting project
 	public void test() throws IOException {
 		sendCommand("HELO localHost", 250);
 		sendCommand("MAIL FROM: <a@a>", 250);
@@ -78,49 +65,71 @@ import java.util.*;
 		
 	}
 	
-	/*
-	Send SMTP commands in order
-	Call sendCommand
-	*/
+	//Send an SMTP email
 	public void send(EmailMessage mailmessage) throws IOException {
+		sendCommand("MAIL FROM: " + mailmessage.Sender, 250);
+		sendCommand("RCPT TO: " + mailmessage.Recipient, 250);
+		sendCommand("DATA", 354);
+		sendCommand(mailmessage.Body + CRLF + ".", 250);
+		
+		/* Example Format
+		MAIL FROM:	sender@a.com
+		RCPT TO:	receiver@b.com
+		DATA
+		Hi, How are you?
+		.
+		QUIT
+		*/	
 		
 		
     }
 	
 	
-	//Close SMTP connection
+	//Quit SMTP connection
     public void close() {
-	
+		isConnected = false;
+		try {	
+			sendCommand("QUIT", 221);	//Close SMTP connection
+			connection.close();			//Close socket
+		
+		} catch (IOException e) {
+			System.out.println("Unable to close connection: " + e);
+			isConnected = true;	
+			
+		}
     }
 	
 	
-	/*
-	Send SMTP command to server
-	Check reply follows RFC 821
-	*/
+	
+	//sendCommand (<command to send>, <expected response number>)
+	//Sends SMTP commands to server
 	private void sendCommand(String command, int rc) throws IOException {
-		
 		toServer.writeBytes(command + CRLF);//Write command to server
 		
-		System.out.print("Client: " + command);
-		
-		//Read server reply
+		//Read server's response
 		response = fromServer.readLine();
-		System.out.println("Server: " + response);
-		if (!response.startsWith("" + rc)) {// Check server response is equal to rc
+		System.out.println(command + "	--> " + response);
+		if (!response.startsWith("" + rc)) {//Check if server response followed RFC 821
 			throw new IOException(rc + " response not received from server");
 		}
 		
-		//rc reply codes
-		/*
-		DATA	354
-		HELO	250
-		MAIL FROM	250
-		QUIT	221
-		RCPT TO	250
+		/* RFC 821
+			DATA		354
+			HELO		250
+			MAIL FROM	250
+			QUIT		221
+			RCPT TO		250
 		*/
+    }
+	
+	
+	//Abort connection if something bad happens
+	protected void finalise() throws Throwable {
+		if ( isConnected ) {
+			close();
+		};
 		
-		
+		super.finalise();
     }
 	
 	

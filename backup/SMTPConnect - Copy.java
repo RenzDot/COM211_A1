@@ -66,12 +66,12 @@ public class SMTPConnect {
     public void close() {
 	isConnected = false;
 	try {
-	    sendCommand( /* Fill in */ );
-	    connection.close();
-	} catch (IOException e) {
-	    System.out.println("Unable to close connection: " + e);
-	    isConnected = true;
-	}
+			sendCommand( /* Fill in */ );
+			connection.close();
+		} catch (IOException e) {
+			System.out.println("Unable to close connection: " + e);
+			isConnected = true;
+		}
     }
 
     /* Send an SMTP command to the server. Check that the reply code is

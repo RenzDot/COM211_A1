@@ -31,14 +31,16 @@ import java.util.*;
 	
 	private boolean isConnected = false;// Used in close()
 	private static final String CRLF = "\r\n";
-	/*
-	Create SMTPConnect object 
-	Create socket
-	Associate streams
-	Initialize SMTP connection	
-	*/
+	
 	
 	public SMTPConnect(EmailMessage mailmessage) throws IOException {
+		
+		/*
+		Create SMTPConnect object ./
+		Create socket ./
+		Associate streams ./
+		Initialize SMTP connection ./
+		*/
 		
 		//Open TCP client socket
 		connection = new Socket(mailmessage.DestHost, mailmessage.DestHostPort);
@@ -58,14 +60,28 @@ import java.util.*;
 			throw new IOException("220 response not received from server.");
 		}
 		
-		String localHost = InetAddress.getLocalHost().getHostName();
-		sendCommand("DATA" + CRLF, 0);
+		String localHost = InetAddress.getLocalHost().getHostName();//Name of client's computer
+		sendCommand("HELO " + localHost);
+		test(); // Remove before submitting project
+
 		
 		isConnected = true;
 	}
 	
-
+	public void test() throws IOException {
+		sendCommand("HELO localHost", 250);
+		sendCommand("MAIL FROM: <a@a>", 250);
+		sendCommand("RCPT TO: <b@b>", 250);
+		sendCommand("DATA", 354);
+		sendCommand("Hi Bob, How's the weather? Alice." + CRLF + ".", 250);
+		sendCommand("QUIT", 221);
+		
+	}
 	
+	/*
+	Send SMTP commands in order
+	Call sendCommand
+	*/
 	public void send(EmailMessage mailmessage) throws IOException {
 		
 		
@@ -78,15 +94,34 @@ import java.util.*;
     }
 	
 	
+	/*
+	Send SMTP command to server
+	Check reply follows RFC 821
+	*/
 	private void sendCommand(String command, int rc) throws IOException {
-		toServer.writeBytes("HELO alice" + CRLF);
+		
+		toServer.writeBytes(command + CRLF);//Write command to server
+		
+		System.out.print("Client: " + command);
+		
+		//Read server reply
 		response = fromServer.readLine();
-		System.out.println("2)" + response);
+		System.out.println("Server: " + response);
+		if (!response.startsWith("" + rc)) {// Check server response is equal to rc
+			throw new IOException(rc + " response not received from server");
+		}
 		
-		
+		//rc reply codes
+		/*
+		DATA	354
+		HELO	250
+		MAIL FROM	250
+		QUIT	221
+		RCPT TO	250
+		*/
 		
 		
     }
-
 	
- }
+	
+}

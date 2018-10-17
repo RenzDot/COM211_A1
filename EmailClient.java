@@ -169,9 +169,8 @@ public class EmailClient extends Frame {
 			/* Pass string from URL field to HTTPGet (trimmed);
 			   returned string is either requested object 
 			   or some error message. */
-/*********************************************
- * Uncomment this for part 2
- ********************************************* 
+
+			//>>>>>>>>>>>>>>> Part 2
  			HttpInteract request = new HttpInteract(urlField.getText().trim());
 			
 			// Send http request. Returned String holds object 
@@ -184,7 +183,9 @@ public class EmailClient extends Frame {
 			}
 			// Change message text 
 			messageText.setText(receivedText);
-*******************************************/
+			
+			//<<<<<<<<<<<<<<<<<
+			
 		}
     }
 	

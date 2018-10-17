@@ -102,8 +102,8 @@ public class HttpInteract {
 		*/
 		/* Fill in */ 		// requires about 10 lines of code
 		System.out.println("Headers:\n"+headers+CRLF);
-	
-
+		
+		
 		/* If object is larger than MAX_OBJECT_SIZE, close the connection and 
 		 * return meaningful message. */
 		if (/* Fill in */) {

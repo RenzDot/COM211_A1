@@ -28,6 +28,11 @@ import java.util.*;
 	
 	//Constructor
 	public HttpInteract(String url) {
+		/*
+		Split "URL" and place into host & path
+		if only host name provided, use "/" path
+		*/
+		
 		
 		return;
 	}

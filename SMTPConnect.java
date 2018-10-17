@@ -70,7 +70,10 @@ import java.util.*;
 		sendCommand("MAIL FROM: " + mailmessage.Sender, 250);
 		sendCommand("RCPT TO: " + mailmessage.Recipient, 250);
 		sendCommand("DATA", 354);
-		sendCommand(mailmessage.Body + CRLF + ".", 250);
+		/*sendCommand(mailmessage.toString() + CRLF 
+					 + ".", 250);*/
+		sendCommand( mailmessage.Headers + mailmessage.Body + CRLF
+					 + ".", 250);
 		
 		/* Example Format
 		MAIL FROM:	sender@a.com
@@ -104,12 +107,12 @@ import java.util.*;
 	//sendCommand (<command to send>, <expected response number>)
 	//Sends SMTP commands to server
 	private void sendCommand(String command, int rc) throws IOException {
-		toServer.writeBytes(command + CRLF);//Write command to server
+		toServer.writeBytes(command + CRLF);	//Write command to server
 		
 		//Read server's response
 		response = fromServer.readLine();
 		System.out.println(command + "	--> " + response);
-		if (!response.startsWith("" + rc)) {//Check if server response followed RFC 821
+		if (!response.startsWith("" + rc)	) {	//Check if response followed RFC 821
 			throw new IOException(rc + " response not received from server");
 		}
 		
@@ -124,13 +127,13 @@ import java.util.*;
 	
 	
 	//Abort connection if something bad happens
-	protected void finalise() throws Throwable {
+	/*protected void finalize() throws Throwable {
 		if ( isConnected ) {
 			close();
 		};
 		
-		super.finalise();
-    }
+		super.finalize();
+    }*/
 	
 	
 }

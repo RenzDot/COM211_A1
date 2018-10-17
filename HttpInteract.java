@@ -30,7 +30,8 @@ import java.util.*;
 	public HttpInteract(String url) {
 		/*
 		Split "URL" and place into host & path
-		if only host name provided, use "/" path
+		If only host name, use "/" path
+		Construct requestMessage with header line
 		*/
 		
 		

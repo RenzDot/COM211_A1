@@ -71,7 +71,7 @@ public class HttpInteract {
 		BufferedReader fromServer;
 		DataOutputStream toServer;
 		
-		System.out.println("Connecting server: " + host+CRLF);
+		System.out.println("Connecting server: " + host + CRLF);
 		
 		/* Connect to http server on port 80.
 		 * Assign input and output streams to connection. */		

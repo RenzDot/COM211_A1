@@ -44,11 +44,11 @@ public class HttpInteract {
 		/*
 		Construct requestMessage
 		Add a header line */
-		sendCommand("GET" + );
+		//We pass this into the send funtion
+		requestMessage = ("GET " + "/" + (pathName) + "HTTP/1.1\r\n");
 
 
-		//Carrige return, indicates end of header lines
-		sendCommand(CRLF);
+
 
 
 
@@ -109,6 +109,7 @@ public class HttpInteract {
 		System.out.println("Send request:\n" + rdequestMessage);
 
 
+
 		/* Send requestMessage to http server */
 
 
@@ -119,7 +120,11 @@ public class HttpInteract {
 		/* Extract status code from status line. If status code is not 200,
 		 * close connection and return an error message.
 		 * Do NOT throw an exception */
-		/* Fill in */
+
+		if (!statusLine.contains("200")){
+				System.out.println("Error, connection closed");
+				connection.close();
+		}
 
 		/* Read header lines from response message, convert to a string,
  		 * and assign to "headers" variable.

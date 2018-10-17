@@ -36,7 +36,7 @@ public class HttpInteract {
 		//Splits URL
 		String[] arrOfUrl = url.split("/", 0);
 	 	//Host Name
-	 	String hostName = (arrOfUrl[0]);
+	 	String hostName = (arrOfUrl[0] + "/";
 	 	//Path Name
 		String pathName = (arrOfUrl[1]);
 

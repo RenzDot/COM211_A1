@@ -173,9 +173,10 @@ public class EmailClient extends Frame {
 			//>>>>>>>>>>>>>>> Part 2
  			HttpInteract request = new HttpInteract(urlField.getText().trim());
 			
+			/*
 			// Send http request. Returned String holds object 
 			try {
-				receivedText=request.send();
+				//receivedText=request.send();
 			}
 			catch (IOException error) {
 				messageText.setText("Downloading File failed.\r\nIOException: " + error);
@@ -183,8 +184,9 @@ public class EmailClient extends Frame {
 			}
 			// Change message text 
 			messageText.setText(receivedText);
+			*/
 			
-			//<<<<<<<<<<<<<<<<<
+			//<<<<<<<<<<<<<<<<< 
 			
 		}
     }

@@ -7,6 +7,11 @@
  	Student-ID:	201270161
  * 	Date:				16/10/18
  *************************************/
+ 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+//NOTE: UNCOMMENT FINALIZE() BEFORE SUBMITTING!!!
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+ 
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -41,7 +46,7 @@ import java.util.*;
 
 		//Check server's response is 220
 		response = fromServer.readLine();
-		System.out.println("1)" + response);
+		System.out.println(response);
 		if (!response.startsWith("220")) {
 			throw new IOException("220 response not received from server.");
 		}
@@ -59,12 +64,10 @@ import java.util.*;
 
 	//Debug only, remove before submitting project
 	public void test() throws IOException {
-		sendCommand("HELO localHost", 250);
 		sendCommand("MAIL FROM: <a@a>", 250);
 		sendCommand("RCPT TO: <b@b>", 250);
 		sendCommand("DATA", 354);
-		sendCommand("Hi Bob, How's the weather? Alice." + CRLF + ".", 250);
-		sendCommand("QUIT", 221);
+		sendCommand("SUBJECT: TEST" + CRLF + CRLF + "Hi Bob, How's the weather? Alice." + CRLF + ".", 250);
 
 	}
 
@@ -73,10 +76,12 @@ import java.util.*;
 		sendCommand("MAIL FROM: " + mailmessage.Sender, 250);
 		sendCommand("RCPT TO: " + mailmessage.Recipient, 250);
 		sendCommand("DATA", 354);
-		/*sendCommand(mailmessage.toString() + CRLF
-					 + ".", 250);*/
-		sendCommand( mailmessage.Headers + mailmessage.Body + CRLF
-					 + ".", 250);
+		sendCommand( 	mailmessage.Headers + CRLF 
+						+ CRLF + CRLF +				//Extra CRLF to make message nice
+						mailmessage.Body + CRLF	+ 
+						".", 250);
+		//test();				
+		
 
 		/* Example Format
 		MAIL FROM:	sender@a.com
@@ -86,8 +91,6 @@ import java.util.*;
 		.
 		QUIT
 		*/
-
-
     }
 
 

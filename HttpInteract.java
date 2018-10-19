@@ -140,7 +140,7 @@ public class HttpInteract {
 				int bodyPos = 0;
 				do {
 					buf = new char[BUF_SIZE];						//Empty Buffer
-					bytesRead = fromServer.read(buf, 0, BUF_SIZE);	//Object to Buffer
+					bytesRead += fromServer.read(buf, 0, BUF_SIZE);	//Object to Buffer
 					
 					//Copy Buffer to body
 					for (char c : buf) {
@@ -150,8 +150,8 @@ public class HttpInteract {
 						};
 						
 					};
-					
-				} while (	bodyLength < bytesRead && bytesRead > (-1)	);
+					System.out.println(bytesRead + " , " + bodyLength);
+				} while (	bytesRead < bodyLength && bytesRead > (-1)	);
 				
 			};
 			
@@ -160,11 +160,8 @@ public class HttpInteract {
 		//Close connection & return object as String
 		System.out.println("Done reading file. Closing connection.");
 		connection.close();
-		if (bytesRead > 0) {
-			return(new String(body, 0, bytesRead));
-		} else {
-			return("Error - No body present");
-		}
+		return(new String(body, 0, bytesRead));
+		
 		
 	}
 }

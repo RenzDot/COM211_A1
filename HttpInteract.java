@@ -14,87 +14,51 @@ import java.util.*;
 /*
  * Class for downloading one object from http server.
  */
-
-/* 
-The EmailClient constructs a HttpInteract class object to hold the request message.
-The EmailClient sends the request using the function HttpInteract.send().
-This function returns a String containing the requested object, or an error message, if one occured.
-The EmailClient updates the message field to the returned String.
-*/
-
 public class HttpInteract {
-	private String hostname;
-	private String pathname;
+	
+	private String host;
+	private String path;
 	private String requestMessage;
-
 
 	private static final int HTTP_PORT = 80;
 	private static final String CRLF = "\r\n";
 	private static final int BUF_SIZE = 4096;
 	private static final int MAX_OBJECT_SIZE = 102400;
 
- 	/* Create a HttpInteract object. */
+ 	//HttpInteract Constructor
 	public HttpInteract(String url) {
 		
-		/* 
-		Split url into pathname & hostname
-		If URL is only hostname, use "/" for path
-		*/
-		
-		//Splits URL into hostname & pathname
+		//Splits URL into host & path
 		if (url.indexOf('/') > (-1)	) {
 			String[] arrOfUrl = url.split("/", 0);
-			//Host Name
-			hostname = (arrOfUrl[0]);
-			//Path Name
-			pathname = (arrOfUrl[1]);
+			host = (arrOfUrl[0]);//Host Name
+			path = (arrOfUrl[1]);//Path Name
 			
 			for (int i = 2; i < arrOfUrl.length; i++) {
-				pathname += "/" + arrOfUrl[i];
+				path += "/" + arrOfUrl[i];
 			};
 			
 		} else {
-			hostname = url;
-			pathname = "";
+			host = url;
+			path = "";
 			
 		};
 		
+		
+		//Construct requestMessage
+		requestMessage = ("GET " + "/" + path + " HTTP/1.1\r\n" +
+						  "Host: " + host + CRLF + CRLF);
 		/*
-		Construct requestMessage
-		Add a header line
-		*/
-		//We pass this into the send function
-		/*
+		Example requestMessage:
 		GET /~gairing/test.txt HTTP/1.1
 		Host: cgi.csc.liv.ac.uk
 		*/
-		requestMessage = ("GET " + "/" + pathname + " HTTP/1.1\r\n" +
-						  "Host: " + hostname + CRLF + CRLF);
 		
 		System.out.print(requestMessage);
-		
-		//Ensure server closes connection after one response.
-		/*if (response.startsWith("220")) {
-			connection.close();
-		};*/
-		
 		return;
 	}
-
-
-	/* 	Send Http request
-		parse response and return requested object as a String (if no errors),
-	 	otherwise return meaningful error message.
-	 	Don't catch Exceptions. EmailClient will handle them. 
-	*/
 	
-	/*
-	Open a TCP connection ./
-	Assign input and output streams to the connection ./
-	Request the object by sending the requestMessage into the OuputStream ./
-	Read the status line from the InputStream and extract the status code ./
-	If the request was successful (status code = 200)  ./
-	*/
+	
 
 	public String send() throws IOException {
 
@@ -115,33 +79,26 @@ public class HttpInteract {
 		BufferedReader fromServer;
 		DataOutputStream toServer;
 
-		System.out.println("Connecting server: " + hostname + CRLF);
+		System.out.println("Connecting server: " + host + CRLF);
 
 		//Connect to HTTP server on port 80
-		connection = new Socket(hostname, HTTP_PORT);
+		connection = new Socket(host, HTTP_PORT);
 		
-		//Assign input and output streams to connection
+		//Assign input to connection
 		InputStream is = connection.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
 		fromServer = new BufferedReader(isr);
 		
+		//Assign output to connection
 		toServer = new DataOutputStream(	connection.getOutputStream()	);
 		System.out.println("Send request:\n" + requestMessage);
 		
-		//Send requestMessage to http server
+		//Send requestMessage to Http server
 		toServer.writeBytes(requestMessage);
 
-		//Read the status line from response message
+		//Extract status line from server's response message
 		statusLine = fromServer.readLine();
 		System.out.println("Status Line:\n" + statusLine + CRLF);
-
-	
-		/*
-		Read the headers ./
-		Extract the length of the body from "Content-Length:" ./
-		Read status line using BufferedReader readLine() ./
-		Read header line using BufferedReader readLine() ./
-		*/
 		
 		//Extract status code
 		status = Integer.valueOf(statusLine.substring(9, 12));
@@ -150,10 +107,10 @@ public class HttpInteract {
 		if (status != 200){
 			connection.close();
 			return("Error, connection closed");
-			
+		
+		//Read Headers & Body, when status code is acceptable
 		} else {
 			String response = fromServer.readLine();
-			System.out.println(response);
 			
 			//Read Headers
 			while (response.length() > 0) {
@@ -166,13 +123,10 @@ public class HttpInteract {
 				
 				};
 				
-				//System.out.println("Content length is: " + bodyLength);
-				
-				response = fromServer.readLine();
-				
+				response = fromServer.readLine();				
 			};
-			
 			System.out.println("Headers:\n" + headers + CRLF);
+			
 			
 			//Close connection when object is larger than MAX_OBJECT_SIZE
 			if (bodyLength > MAX_OBJECT_SIZE) {
@@ -181,62 +135,35 @@ public class HttpInteract {
 			
 			//Read Body
 			} else {
-				/*int bodyPos = 0;
-				bytesRead = fromServer.read(buf, 0, BUF_SIZE);
-				for (char c : buf) {
-					body[bodyPos] = c;
-					bodyPos++;
-					if (c != 0) {
-						System.out.println(body[bodyPos]);
-					};
-				};
 				
-				//Read body in chunks
-				System.out.println(bodyLength + " , " + bytesRead);
-				System.out.println((bodyLength < bytesRead) + " && " + (bytesRead > (-1)));
-				while (	bodyLength < bytesRead && bytesRead > (-1)	) {
-					
-					//Copy buffered chunks into body
-					for (char c : buf) {
-						body[bodyPos] = c;
-						bodyPos++;
-						if (c != 0) {
-							System.out.println(body[bodyPos]);
-						}
-					};
-					
-					//Reset buffer
-					buf = new char[BUF_SIZE];
-					bytesRead = fromServer.read(buf, 0, BUF_SIZE);
-					
-				};*/
+				//Read Body in chunks using Buffer
 				int bodyPos = 0;
-				
 				do {
 					buf = new char[BUF_SIZE];						//Empty Buffer
-					bytesRead = fromServer.read(buf, 0, BUF_SIZE);	//Place object in buffer
+					bytesRead = fromServer.read(buf, 0, BUF_SIZE);	//Object to Buffer
 					
-					//Copy buffer to body
+					//Copy Buffer to body
 					for (char c : buf) {
-						if (c != 0) {			//Add char to body if not null
+						if (c != 0) {		//Add char to body if not null
 							body[bodyPos] = c;
 							bodyPos++;
 						};
+						
 					};
 					
 				} while (	bodyLength < bytesRead && bytesRead > (-1)	);
 				
 			};
 			
-			
 		};
 		
+		//Close connection & return object as String
 		System.out.println("Done reading file. Closing connection.");
 		connection.close();
 		if (bytesRead > 0) {
 			return(new String(body, 0, bytesRead));
 		} else {
-			return("Error");
+			return("Error - No body present");
 		}
 		
 	}

@@ -1,7 +1,7 @@
 /*************************************
  * 	Filename:  HttpInteract.java
  * 	Name: 			Lorenzo Jumilla
- 		Student-ID:
+ 		Student-ID: 201202403
  *  Name:				Daniel Stevens
  		Student-ID:	201270161
  * 	Date:				16/10/18
@@ -35,19 +35,19 @@ public class HttpInteract {
 
  	/* Create a HttpInteract object. */
 	public HttpInteract(String url) {
-
+		
 		/* 
 		Split url into pathname & hostname
 		If URL is only hostname, use "/" for path
 		*/
-		 
+		
 		//Splits URL into hostname & pathname
 		if (url.indexOf('/') > (-1)	) {
 			String[] arrOfUrl = url.split("/", 0);
 			//Host Name
-			hostname = (arrOfUrl[0]);	
+			hostname = (arrOfUrl[0]);
 			//Path Name
-			pathname = (arrOfUrl[1]);	
+			pathname = (arrOfUrl[1]);
 			
 			for (int i = 2; i < arrOfUrl.length; i++) {
 				pathname += "/" + arrOfUrl[i];
@@ -61,23 +61,23 @@ public class HttpInteract {
 		
 		/*
 		Construct requestMessage
-		Add a header line 
+		Add a header line
 		*/
 		//We pass this into the send function
 		/*
 		GET /~gairing/test.txt HTTP/1.1
 		Host: cgi.csc.liv.ac.uk
 		*/
-		requestMessage = ("GET " + "/" + pathname + " HTTP/1.1\r\n" + 
-						  "Host: " + hostname + CRLF);
-		//System.out.print(requestMessage + "\n" + hostname + "\n" + pathname);
+		requestMessage = ("GET " + "/" + pathname + " HTTP/1.1\r\n" +
+						  "Host: " + hostname + CRLF + CRLF);
 		
-
+		System.out.print(requestMessage);
+		
 		//Ensure server closes connection after one response.
 		/*if (response.startsWith("220")) {
 			connection.close();
-		}*/
-
+		};*/
+		
 		return;
 	}
 
@@ -85,87 +85,159 @@ public class HttpInteract {
 	/* 	Send Http request
 		parse response and return requested object as a String (if no errors),
 	 	otherwise return meaningful error message.
-	 	Don't catch Exceptions. EmailClient will handle them. */
+	 	Don't catch Exceptions. EmailClient will handle them. 
+	*/
+	
+	/*
+	Open a TCP connection ./
+	Assign input and output streams to the connection ./
+	Request the object by sending the requestMessage into the OuputStream ./
+	Read the status line from the InputStream and extract the status code ./
+	If the request was successful (status code = 200)  ./
+	*/
 
 	public String send() throws IOException {
 
 		char[] buf = new char[BUF_SIZE];		//Buffer to read in 4kB chunks
 		char[] body = new char[MAX_OBJECT_SIZE];//Max size of object
-
-		String statusLine = "";				
-		int status;								// Status code
-		String headers = "";	
-		int bodyLength = (-1);
-
+		
 		String[] tmp;
-		Socket connection;	//Socket to server
+		String headers = "";
+		int bodyLength = (-1);
+		int bytesRead = 0;
+		
+		String statusLine = "";
+		int status;				//Status code
+			
+		Socket connection;		//Socket to server
 
-		/* Streams for reading from and writing to socket */
+		//Streams for reading from and writing to socket
 		BufferedReader fromServer;
 		DataOutputStream toServer;
 
 		System.out.println("Connecting server: " + hostname + CRLF);
 
-		/* Connect to http server on port 80.
-		 * Assign input and output streams to connection. */
-		connection = new Socket("cgi.csc.liv.ac.uk", HTTP_PORT);
-		//fromServer = new BufferedReader(isr);
-		//toServer = new DataOutputStream(	connection.getOutputStream()	);
-
+		//Connect to HTTP server on port 80
+		connection = new Socket(hostname, HTTP_PORT);
+		
+		//Assign input and output streams to connection
+		InputStream is = connection.getInputStream();
+		InputStreamReader isr = new InputStreamReader(is);
+		fromServer = new BufferedReader(isr);
+		
+		toServer = new DataOutputStream(	connection.getOutputStream()	);
 		System.out.println("Send request:\n" + requestMessage);
+		
+		//Send requestMessage to http server
+		toServer.writeBytes(requestMessage);
 
+		//Read the status line from response message
+		statusLine = fromServer.readLine();
+		System.out.println("Status Line:\n" + statusLine + CRLF);
 
-		/* Send requestMessage to http server */
-
-
-		/* Read the status line from response message */
-		//statusLine= reponse.readLine();
-		System.out.println("Status Line:\n"+statusLine+CRLF);
-
-		/* Extract status code from status line. If status code is not 200,
-		 * close connection and return an error message.
-		 * Do NOT throw an exception */
-
-		if (!statusLine.contains("200")){
-				System.out.println("Error, connection closed");
-				connection.close();
-		}
-
-		/* Read header lines from response message, convert to a string,
- 		 * and assign to "headers" variable.
-		 * Recall that an empty line indicates end of headers.
-		 * Extract length  from "Content-Length:" (or "Content-length:")
-		 * header line, if present, and assign to "bodyLength" variable.
+	
+		/*
+		Read the headers ./
+		Extract the length of the body from "Content-Length:" ./
+		Read status line using BufferedReader readLine() ./
+		Read header line using BufferedReader readLine() ./
 		*/
-		/* Fill in */ 		// requires about 10 lines of code
-		System.out.println("Headers:\n"+headers+CRLF);
-
-
-		/* If object is larger than MAX_OBJECT_SIZE, close the connection and
-		 * return meaningful message. */
-		/*if () {
+		
+		//Extract status code
+		status = Integer.valueOf(statusLine.substring(9, 12));
+		
+		//Check status code
+		if (status != 200){
+			connection.close();
+			return("Error, connection closed");
 			
-			return( + bodyLength);
-		}*/
-
-		/* Read the body in chunks of BUF_SIZE using buf[] and copy the chunk
-		 * into body[]. Stop when either we have
-		 * read Content-Length bytes or when the connection is
-		 * closed (when there is no Content-Length in the response).
-		 * Use one of the read() methods of BufferedReader here, NOT readLine().
-		 * Make sure not to read more than MAX_OBJECT_SIZE characters.
-		 */
-		int bytesRead = 0;
-
-		/* Fill in */   // Requires 10-20 lines of code
-
-		/* At this points body[] should hold to body of the downloaded object and
-		 * bytesRead should hold the number of bytes read from the BufferedReader
-		 */
-
-		/* Close connection and return object as String. */
+		} else {
+			String response = fromServer.readLine();
+			System.out.println(response);
+			
+			//Read Headers
+			while (response.length() > 0) {
+				headers += response + CRLF;
+				
+				//Read Content-Length
+				if (	(response.toLowerCase()).contains("content-length:")	) {
+					String[] responseArray = response.split(" ");
+					bodyLength = Integer.valueOf(responseArray[1]);//Assign bodylength
+				
+				};
+				
+				//System.out.println("Content length is: " + bodyLength);
+				
+				response = fromServer.readLine();
+				
+			};
+			
+			System.out.println("Headers:\n" + headers + CRLF);
+			
+			//Close connection when object is larger than MAX_OBJECT_SIZE
+			if (bodyLength > MAX_OBJECT_SIZE) {
+				connection.close();
+				return("Requested object is too large\nBody Length = " + bodyLength);
+			
+			//Read Body
+			} else {
+				/*int bodyPos = 0;
+				bytesRead = fromServer.read(buf, 0, BUF_SIZE);
+				for (char c : buf) {
+					body[bodyPos] = c;
+					bodyPos++;
+					if (c != 0) {
+						System.out.println(body[bodyPos]);
+					};
+				};
+				
+				//Read body in chunks
+				System.out.println(bodyLength + " , " + bytesRead);
+				System.out.println((bodyLength < bytesRead) + " && " + (bytesRead > (-1)));
+				while (	bodyLength < bytesRead && bytesRead > (-1)	) {
+					
+					//Copy buffered chunks into body
+					for (char c : buf) {
+						body[bodyPos] = c;
+						bodyPos++;
+						if (c != 0) {
+							System.out.println(body[bodyPos]);
+						}
+					};
+					
+					//Reset buffer
+					buf = new char[BUF_SIZE];
+					bytesRead = fromServer.read(buf, 0, BUF_SIZE);
+					
+				};*/
+				int bodyPos = 0;
+				
+				do {
+					buf = new char[BUF_SIZE];						//Empty Buffer
+					bytesRead = fromServer.read(buf, 0, BUF_SIZE);	//Place object in buffer
+					
+					//Copy buffer to body
+					for (char c : buf) {
+						if (c != 0) {			//Add char to body if not null
+							body[bodyPos] = c;
+							bodyPos++;
+						};
+					};
+					
+				} while (	bodyLength < bytesRead && bytesRead > (-1)	);
+				
+			};
+			
+			
+		};
+		
 		System.out.println("Done reading file. Closing connection.");
 		connection.close();
-		return(new String(body, 0, bytesRead));
+		if (bytesRead > 0) {
+			return(new String(body, 0, bytesRead));
+		} else {
+			return("Error");
+		}
+		
 	}
 }

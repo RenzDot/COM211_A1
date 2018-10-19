@@ -8,10 +8,6 @@
  * 	Date:				16/10/18
  *************************************/
  
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-//NOTE: UNCOMMENT FINALIZE() BEFORE SUBMITTING!!!
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
- 
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -133,13 +129,13 @@ import java.util.*;
 
 
 	//Abort connection if something bad happens
-	/*protected void finalize() throws Throwable {
+	protected void finalize() throws Throwable {
 		if ( isConnected ) {
 			close();
 		};
 
 		super.finalize();
-    }*/
+    }
 
 
 }
